@@ -16,7 +16,7 @@ public class Trigger {
         return isActive.getAsBoolean();
     }
 
-    public Trigger whenActive(Command command) {
+    public Trigger whenActive(final Command command) {
         Objects.requireNonNull(command);
 
         CommandScheduler.addButton(new Runnable() {
@@ -34,11 +34,11 @@ public class Trigger {
         return this;
     }
 
-    public Trigger whenHeld(Command command) {
+    public Trigger whenPressed(Command command) {
         return whenActive(command);
     }
 
-    public Trigger whileActiveContinuous(Command command) {
+    public Trigger whileActiveContinuous(final Command command) {
         Objects.requireNonNull(command);
 
         CommandScheduler.addButton(new Runnable() {
@@ -58,11 +58,11 @@ public class Trigger {
         return this;
     }
 
-    public Trigger whileHeldContinuous(Command command) { 
+    public Trigger whileHeld(Command command) { 
         return whileActiveContinuous(command); 
     }
 
-    public Trigger whileActiveOnce(Command command) {
+    public Trigger whileActiveOnce(final Command command) {
         Objects.requireNonNull(command);
 
         CommandScheduler.addButton(new Runnable() {
@@ -82,11 +82,11 @@ public class Trigger {
         return this;
     }
 
-    public Trigger whileHeldOnce(Command command) {
-        return whileHeldOnce(command);
+    public Trigger whenHeld(Command command) {
+        return whileActiveOnce(command);
     }
 
-    public Trigger whenInactive(Command command) {
+    public Trigger whenInactive(final Command command) {
         Objects.requireNonNull(command);
 
         CommandScheduler.addButton(new Runnable() {
@@ -107,7 +107,7 @@ public class Trigger {
         return whenInactive(command);
     }
 
-    public Trigger toggleWhenActive(Command command) {
+    public Trigger toggleWhenActive(final Command command) {
         Objects.requireNonNull(command);
 
         CommandScheduler.addButton(new Runnable() {
@@ -133,7 +133,8 @@ public class Trigger {
         return toggleWhenActive(command);
     }
 
-    public Trigger cancelWhenActive(Command command) {
+    public Trigger cancelWhenActive(final Command command) {
+        Objects.requireNonNull(command);
         CommandScheduler.addButton(new Runnable() {
             private boolean lastPressed = get();
 

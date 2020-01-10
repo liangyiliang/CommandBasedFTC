@@ -4,8 +4,8 @@ import java.util.*;
 public final class CommandScheduler {
 
     /**
-     * This class is used to emulate the C++ "friend" class features. 
-     * @see https://stackoverflow.com/questions/182278/is-there-a-way-to-simulate-the-c-friend-concept-in-java
+     * This class is used to emulate the C++ "friend" class features. See https://stackoverflow.com/questions/182278/is-there-a-way-to-simulate-the-c-friend-concept-in-java
+     * @see AccessToken
      */
     public static final class CSAccessToken extends AccessToken {
         private CSAccessToken() { }
@@ -50,14 +50,13 @@ public final class CommandScheduler {
     }
 
     public static void scheduleCommand(Command cmd) {
-        if(cmd.isFinished()) {
-            throw new IllegalArgumentException("Cannot schedule a finished command.");
-        }
         if(!subsystems.containsAll(cmd.getRequirements())) {
             throw new IllegalArgumentException("Cannot schedule command because requirement not met.");
         }
-        scheduledCommands.add(cmd);
-        cmd.init();
+        if(!scheduledCommands.contains(cmd)){
+            scheduledCommands.add(cmd);
+            cmd.init();
+        }
     }
 
     public static void scheduleCommands(Command ... cmds) {
@@ -73,6 +72,10 @@ public final class CommandScheduler {
     public static void runOnce() {
         Set<Subsystem> usedSs = new HashSet<Subsystem>();
         ArrayList<Command> toRemove = new ArrayList<Command>();
+
+        for(Runnable button : buttons) {
+            button.run();
+        }
 
         for(Command cmd : scheduledCommands) {
             if(cmd.isFinished()) {
@@ -96,10 +99,6 @@ public final class CommandScheduler {
                 }
             }
         }
-
-        for(Runnable button : buttons) {
-            button.run();
-        }
     }
 
     public static void unscheduleCommand(Command command) {
@@ -111,5 +110,25 @@ public final class CommandScheduler {
 
     public static boolean isScheduled(Command command) {
         return scheduledCommands.contains(command);
+    }
+
+    public static void unscheduleAll() {
+        while(!scheduledCommands.isEmpty()) {
+            unscheduleCommand(scheduledCommands.get(0));
+        }
+    }
+
+    public static void unregisterAllButtons() {
+        buttons.clear();
+    }
+
+    public static void unregisterSubsystems(Subsystem ... sss) {
+        for(Subsystem ss : sss) {
+            subsystems.remove(ss);
+        }
+    }
+
+    public static void unregisterAllSubsystems() {
+        subsystems.clear();
     }
 }
