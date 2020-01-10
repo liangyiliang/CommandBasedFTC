@@ -13,6 +13,7 @@ public class SequentialCommand extends Command {
         this.commands = new LinkedList<Command>();
         for(Command cmd : commands) {
             addCommand(cmd);
+            addRequirements((Subsystem[])cmd.getRequirements().toArray());
         }
     }
 

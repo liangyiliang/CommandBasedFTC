@@ -15,6 +15,7 @@ public abstract class ParallelCommand extends Command {
     public void addCommand(Command cmd) {
         if(!cmd.isFinished()) {
             commands.add(cmd);
+            addRequirements((Subsystem[])cmd.getRequirements().toArray());
         }
     }
 
