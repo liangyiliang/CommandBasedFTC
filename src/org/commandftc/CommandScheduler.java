@@ -4,18 +4,31 @@ import java.util.*;
 public final class CommandScheduler {
 
     /**
+     * This class is used to emulate the C++ "friend" class features. 
+     * @see https://stackoverflow.com/questions/182278/is-there-a-way-to-simulate-the-c-friend-concept-in-java
+     */
+    public static final class CSAccessToken extends AccessToken {
+        private CSAccessToken() { }
+    }
+
+    private static final CSAccessToken accessToken = new CSAccessToken();
+
+    /**
      * Subsystem and Default Command
      */
     private static final Map<Subsystem, Command> mapSsDefCmd;
 
-    private static final ArrayList<Subsystem> subsystems;
+    private static final Set<Subsystem> subsystems;
 
-    private static final ArrayList<Command> scheduledCommands;
+    private static final LinkedList<Command> scheduledCommands;
+
+    private static final Set<Runnable> buttons; 
 
     static {
         mapSsDefCmd = new LinkedHashMap<> ();
-        subsystems = new ArrayList<Subsystem>();
-        scheduledCommands = new ArrayList<Command>();
+        subsystems = new HashSet<Subsystem>();
+        scheduledCommands = new LinkedList<Command>();
+        buttons = new LinkedHashSet<Runnable>();
     }
 
     public static void setDefaultCommand(Subsystem ss, Command cmd) {
@@ -53,24 +66,50 @@ public final class CommandScheduler {
         }
     }
 
-    public static void runOnce() {
-        for(Subsystem ss : subsystems) {
-            ss.periodic();
-            mapSsDefCmd.get(ss).execute();
-        }
+    public static void addButton(Runnable button) {
+        buttons.add(button);
+    }
 
-        Command toRemove = null;
+    public static void runOnce() {
+        Set<Subsystem> usedSs = new HashSet<Subsystem>();
+        ArrayList<Command> toRemove = new ArrayList<Command>();
+
         for(Command cmd : scheduledCommands) {
             if(cmd.isFinished()) {
-                cmd.end();
-                toRemove = cmd;
+                cmd.real_end(accessToken);
+                toRemove.add(cmd);
             } else {
+                usedSs.addAll(cmd.getRequirements());
                 cmd.execute();
             }
         }
 
-        if(toRemove != null) {
-            scheduledCommands.remove(toRemove);
+        scheduledCommands.removeAll(toRemove);
+
+        for(Subsystem ss : subsystems) {
+            if(!usedSs.contains(ss)) {
+                Command defaultCommand = mapSsDefCmd.get(ss);
+                if(defaultCommand != null) {
+                    defaultCommand.execute();
+                } else {
+                    ss.periodic();
+                }
+            }
         }
+
+        for(Runnable button : buttons) {
+            button.run();
+        }
+    }
+
+    public static void unscheduleCommand(Command command) {
+        if(scheduledCommands.contains(command)) {
+            command.real_end(accessToken);
+            scheduledCommands.remove(command);
+        }
+    }
+
+    public static boolean isScheduled(Command command) {
+        return scheduledCommands.contains(command);
     }
 }

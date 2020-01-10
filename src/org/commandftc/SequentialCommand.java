@@ -3,6 +3,15 @@ package org.commandftc;
 import java.util.LinkedList;
 
 public class SequentialCommand extends Command {
+    /**
+     * This class is used to emulate the C++ "friend" class features. 
+     * @see https://stackoverflow.com/questions/182278/is-there-a-way-to-simulate-the-c-friend-concept-in-java
+     */
+    public static final class SCAccessToken extends AccessToken {
+        private SCAccessToken() {}
+    }
+    public static final SCAccessToken accessToken = new SCAccessToken();
+
     private LinkedList<Command> commands;
 
     public SequentialCommand() {
@@ -13,7 +22,9 @@ public class SequentialCommand extends Command {
         this.commands = new LinkedList<Command>();
         for(Command cmd : commands) {
             addCommand(cmd);
-            addRequirements((Subsystem[])cmd.getRequirements().toArray());
+            for(Subsystem ss : cmd.getRequirements()) {
+                addRequirements(ss);
+            }
         }
     }
 
@@ -40,7 +51,7 @@ public class SequentialCommand extends Command {
         if(commands.isEmpty()) return;
         Command currCmd = commands.getFirst();
         if(currCmd.isFinished()) {
-            currCmd.end();
+            currCmd.real_end(accessToken);
             commands.pop();
             // Jump to "A"
         } else {
@@ -63,7 +74,7 @@ public class SequentialCommand extends Command {
     @Override
     public void end() {
         for(Command cmd : commands) {
-            cmd.end();
+            cmd.real_end(accessToken);
         }
     }
 

@@ -1,8 +1,4 @@
 package tests;
-
-import java.io.PrintStream;
-import java.io.StringWriter;
-
 import org.commandftc.*;
 
 public class TestMain {

@@ -3,7 +3,7 @@ import java.util.*;
 
 public abstract class Command {
     private final Set<Subsystem> requirements = new HashSet<Subsystem>();
-    protected boolean stopped = false;
+    private boolean stopped = false;
 
     /**
      * Returns a list of all subsystems required by this command.
@@ -42,8 +42,21 @@ public abstract class Command {
      * The code in this method will run only once, when CommandScheduler ends this command (either by interrupting or by stopping it after isFinished() returns true).
      * Override this.
      */
-    public void end() {
+    protected void end() {
 
+    }
+
+    /**
+     * DO NOT USE THIS METHOD!
+     * This method serves to eliminate double-ending a command.
+     */
+    public void real_end(AccessToken token) {
+        Objects.requireNonNull(token);
+
+        if(!stopped) {
+            end();
+            stopped = true;
+        }
     }
 
     /**

@@ -23,10 +23,7 @@ public class TestCommand extends Command {
     }
     @Override
     public void end() {
-        if(!stopped) {
-            System.out.println(name + " end");
-            stopped = true;
-        }
+        System.out.println(name + " end");
     }
 
     @Override
