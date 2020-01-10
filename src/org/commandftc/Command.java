@@ -1,22 +1,23 @@
 package org.commandftc;
-import java.util.ArrayList;
+import java.util.*;
 
 public abstract class Command {
-    private ArrayList<Subsystem> requirements = new ArrayList<>();
+    private final Set<Subsystem> requirements = new HashSet<Subsystem>();
+    protected boolean stopped = false;
 
     /**
      * Returns a list of all subsystems required by this command.
      * @return a list of all subsystems required by this command
      */
-    public ArrayList<Subsystem> getRequirements() {
+    public Set<Subsystem> getRequirements() {
         return requirements;
     }
 
     /**
      * Adds an arbitrary number of subsystems to the requirements of this command.
      */
-    public void addRequirements(Subsystem ... sss) {
-        for(Subsystem ss : sss) {
+    protected void addRequirements(final Subsystem ... sss) {
+        for(final Subsystem ss : sss) {
             requirements.add(ss);
         }
     }
@@ -37,10 +38,8 @@ public abstract class Command {
 
     /**
      * The code in this method will run only once, when CommandScheduler ends this command (either by interrupting or by stopping it after isFinished() returns true).
-     * @param interrupted true if the command ends while being interrupted by CommandScheduler, 
-     *                    false otherwise.
      */
-    public void end(boolean interrupted) {
+    public void end() {
 
     }
 
@@ -50,5 +49,41 @@ public abstract class Command {
      */
     public boolean isFinished() {
         return false;
+    }
+
+    public SequentialCommand andThen(Command next) {
+        return makeSequential(this, next);
+    }
+
+    public ParallelWaitCommand also(Command other) {
+        return makeParallelWait(this, other);
+    }
+
+    public ParallelSpecifiedCommand whileUntilLeft(Command other) {
+        return makeParallelSpecified(this, this, other);
+    }
+
+    public ParallelSpecifiedCommand whileUntilRight(Command other) {
+        return makeParallelSpecified(other, this, other);
+    }
+
+    public ParallelFirstCommand whileUntilEither(Command other) {
+        return makeParallelFirst(other);
+    }
+
+    public static SequentialCommand makeSequential(Command ... commands) {
+        return new SequentialCommand(commands);
+    }
+
+    public static ParallelWaitCommand makeParallelWait(Command ... commands) {
+        return new ParallelWaitCommand(commands);
+    }
+
+    public static ParallelFirstCommand makeParallelFirst(Command ... commands) {
+        return new ParallelFirstCommand(commands);
+    }
+
+    public static ParallelSpecifiedCommand makeParallelSpecified(Command specifiedCommand, Command ... commands) {
+        return new ParallelSpecifiedCommand(specifiedCommand, commands);
     }
 }
