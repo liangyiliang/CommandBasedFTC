@@ -24,6 +24,7 @@ public abstract class Command {
 
     /**
      * The code in this method will only run once, when the command is scheduled.
+     * Override this.
      */
     public void init() {
 
@@ -31,6 +32,7 @@ public abstract class Command {
 
     /**
      * The code in this method will be executed continuously by the CommandScheduler until isFinished() returns true or the CommandScheduler ends the command.
+     * Override this.
      */
     public void execute() {
 
@@ -38,6 +40,7 @@ public abstract class Command {
 
     /**
      * The code in this method will run only once, when CommandScheduler ends this command (either by interrupting or by stopping it after isFinished() returns true).
+     * Override this.
      */
     public void end() {
 
@@ -46,6 +49,7 @@ public abstract class Command {
     /**
      * Returns whether this command is finished. Returning false tells CommandScheduler to continue calling the execute() method, and returning true tells it to end the command.
      * For a command that lasts throughout an entire game, for example, it should never "finish", i.e. isFinished() should always yield false.
+     * Override this.
      */
     public boolean isFinished() {
         return false;
